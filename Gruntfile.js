@@ -374,6 +374,7 @@ module.exports = function (grunt) {
           src: [
             '*.{ico,png,txt}',
             '.htaccess',
+            'README.md',
             '*.html',
             'views/{,*/}*.html',
             'scripts/views/*.html',
