@@ -27,7 +27,15 @@ md-icon { font-size: 24px; line-height: 24px;}
 .md-tile-content .statistic > md-icon {font-size: 12px; line-height: 12px; color: #555; width: 12px; height: 12px;}
 .md-tile-content .statistic > span {margin-right: 10px; vertical-align: middle;}
 
-md-tabs { height: 48px; overflow: hidden;}
+md-tabs {
+  height: 48px;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 220px;
+  z-index: 100;
+  width: 100%;
+}
 md-tabs.main-nav md-tab,
 md-tabs.main-nav .md-header {
     background-color: #1C1C1F !important;
@@ -47,6 +55,11 @@ md-tabs.main-nav md-tab {
 md-tabs.main-nav md-tab md-itemcon {
   width: 15px;
   height: 15px;
+}
+
+.tabpanel-container {
+  padding-top: 48px;
+  padding-bottom: 40px;
 }
 
 .md-header-items-container { font-size: 12px; line-height: 12px;}
@@ -108,6 +121,12 @@ body#soundcloudify {
   text-rendering: optimizeLegibility;
   -webkit-user-select: none;
   background-color: #121314;
+}
+
+#wrapper{
+  min-height: 100%;
+  max-height: 100%;
+  overflow: scroll;
 }
 
 #main {
@@ -280,7 +299,6 @@ md-slider:not([md-discrete]):not([disabled]):focus .md-focus-ring, md-slider:not
 }
 
     #discovery [role="tabpanel"] {
-      overflow: hidden;
     }
 
     #discovery .tab-content {
