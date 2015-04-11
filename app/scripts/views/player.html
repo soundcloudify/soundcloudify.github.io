@@ -1,6 +1,6 @@
 <section>
     <div class="artwork">
-        <img ng-src="{{player.state.currentTrack.artworkUrl | 'images/artwork-default.jpg'}}" alt="{{player.state.currentTrack.title}}">
+        <img src="images/artwork-default.jpg" ng-src="{{player.state.currentTrack.artworkUrl | scArtwork}}" alt="{{player.state.currentTrack.title}}">
         <progress value="{{ player.state.currentTime / player.state.duration || 0 }}"
             ng-click="doSeek($event)">
             {{ player.state.currentTime / player.state.duration }}
