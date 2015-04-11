@@ -64,7 +64,7 @@
             this.player.clearVideo();
         };
         this.setVolume = function(volume) {
-            if (this.player) {
+            if (this.player && this.player.setVolume) {
                 this.player.setVolume(volume * 100);
 
                 if( this.player.isMuted()) {
