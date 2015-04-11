@@ -114,6 +114,12 @@ body#soundcloudify {
   position: relative;
 }
 
+#invisible-player {
+  display: none;
+  width: 0px;
+  height: 0px;
+}
+
 #player {
   width: 220px;
   height: 100%;
