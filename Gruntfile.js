@@ -376,6 +376,9 @@ module.exports = function (grunt) {
             '.htaccess',
             '*.html',
             'views/{,*/}*.html',
+            'scripts/views/*.html',
+            'partials/**/*',
+            'fonts/**/*',
             'images/{,*/}*.{webp}',
             'styles/fonts/{,*/}*.*'
           ]
@@ -384,6 +387,12 @@ module.exports = function (grunt) {
           cwd: '.tmp/images',
           dest: '<%= yeoman.dist %>/images',
           src: ['generated/*']
+        }, {
+          expand: true,
+          dot: true,
+          cwd: 'bower_components/ionicons/fonts',
+          dest: '<%= yeoman.dist %>/fonts',
+          src: ['*']
         }]
       },
       styles: {
