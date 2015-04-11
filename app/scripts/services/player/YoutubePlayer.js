@@ -64,10 +64,12 @@
             this.player.clearVideo();
         };
         this.setVolume = function(volume) {
-            this.player.setVolume(volume * 100);
+            if (this.player) {
+                this.player.setVolume(volume * 100);
 
-            if( this.player.isMuted()) {
-                this.player.unMute();
+                if( this.player.isMuted()) {
+                    this.player.unMute();
+                }
             }
         };
 

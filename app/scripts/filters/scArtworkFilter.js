@@ -6,7 +6,7 @@
     function scArtworkFilter() {
         return function(value) {
 
-            if (!value) return 'images/artwork-default.jpg';
+            if (!value) return '';
 
             if (value.indexOf('-large') !== -1) {
                 return value.replace('-large.', '-t250x250.');

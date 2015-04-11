@@ -137,9 +137,12 @@
                 duration: 0
             });
 
-            Messaging.sendClearMessage();
             NowPlaying.saveList(this.tracks);
             NowPlaying.saveState(this.state);
+            
+            if(this.activePlayer) {
+                this.activePlayer.clear();
+            }
         }
 
         this.play = function(index) {
@@ -183,19 +186,31 @@
         this.pause = function() {
             this.state.playing = false;
             NowPlaying.saveState(this.state);
-            Messaging.sendPauseMessage();
+            
+            if(this.activePlayer) {
+                this.activePlayer.pause();
+            }
         };
 
         this.resume = function() {
             this.state.playing = true;
             NowPlaying.saveState(this.state);
-            Messaging.sendResumeMessage();
+            if (!this.activePlayer) {
+                this.play(this.state.currentTrack);
+                return;
+            }
+
+            this.activePlayer.resume();
         };
 
         this.stop = function() {
             this.state.playing = false;
             this.state.currentTime = 0;
             NowPlaying.saveState(this.state);
+
+            if (this.activePlayer) {
+                this.activePlayer.stop();
+            }
         };
 
         this.playPause = function(index) {
@@ -212,16 +227,41 @@
         };
 
         this.next = function() {
-            Messaging.sendNextMessage();
+            var nextIndex;
+
+            if (this.state.shuffle) {
+                
+                nextIndex = Utils.random(0, this.tracks.length - 1);
+
+            } else {
+                
+                nextIndex = this.state.currentIndex + 1;
+
+                if (nextIndex >= this.tracks.length) {
+                    nextIndex = 0;
+                }
+            }
+
+            this.play(nextIndex);
         };
 
         this.previous = function() {
-            Messaging.sendPrevMessage();
+            var currentIndex = this.state.currentIndex;
+            var nextIndex = currentIndex - 1;
+
+            if (nextIndex < 0) {
+                nextIndex = this.tracks.length -1;
+            }
+
+            this.play(nextIndex);
         };
 
         this.seek = function(xpos) {
             this.state.currentTime = xpos * this.state.duration;
-            Messaging.sendSeekMessage(xpos);
+
+            if (this.activePlayer) {
+                this.activePlayer.seek(xpos);
+            }
         };
 
         this.updateState = function(data) {
@@ -245,7 +285,8 @@
 
         this.setVolume = function(volume) {
             this.state.volume = volume;
-            Messaging.sendVolumeMessage(volume);
+            SoundCloudPlayer.setVolume(volume);
+            YouTubePlayer.setVolume(volume);
             deboundSaveVolume();
         };
 
@@ -320,7 +361,22 @@
         });
 
         $rootScope.$on('player.ended', function() {
-            self.stop();
+            $rootScope.$apply(function() {
+                if (self.state.repeat === 0) {
+                    if (self.state.currentIndex === self.tracks.length - 1) {
+                        self.stop();
+                        self.seek(0);
+                        currentPort.postMessage({message: 'scd.ended'});
+                    } else {
+                        self.next.call(self);
+                    }
+                } else if (self.state.repeat === 1) {
+                    self.next.call(self);
+                } else {
+                    self.replay.call(self);
+                }
+            });
+            
         });
 
         // Messaging.registerLastFmInvalidHandler(function() {
