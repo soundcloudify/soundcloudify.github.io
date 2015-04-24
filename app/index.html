@@ -5,6 +5,7 @@
         <title>SoundCloudify</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
+        <meta name="google-signin-client_id" content="393554771612-7ul6ukv312fedg048ubrf8bfcvni3i75.apps.googleusercontent.com">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <!-- build:css(.) styles/vendor.css -->
         <!-- bower:css -->
@@ -26,6 +27,7 @@
         <div id="wrapper" layout="row">
             <div id="player">
                 <scd-player></scd-player>
+                <google-signin></google-signin>
             </div>
 
             <div id="discovery" ng-controller="DiscoveryController as vm">
@@ -109,6 +111,7 @@
             <script src="scripts/directives/playingTrackAwareDirective.js"></script>
             <script src="scripts/directives/configurationDirective.js"></script>
             <script src="scripts/directives/rightClickDirective.js"></script>
+            <script src="scripts/directives/googleSigninDirective.js"></script>
 
             <script src="scripts/providers/Paginator.js"></script>
 
@@ -129,7 +132,7 @@
 
             <script src="scripts/services/player/Player.js"></script>
             <script src="scripts/services/player/SoundCloudPlayer.js"></script>
-            <script src="scripts/services/player/YouTubePlayer.js"></script>
+            <script src="scripts/services/player/YoutubePlayer.js"></script>
             <!-- endbuild -->
 </body>
 </html>

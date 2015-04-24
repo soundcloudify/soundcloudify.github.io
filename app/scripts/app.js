@@ -142,10 +142,23 @@
 		}
 	]);
 
-	soundCloudify.run(function($rootScope, GATracker, $location) {
+	soundCloudify.run(function($rootScope, GATracker, $location, $window) {
 		$rootScope.$on('$stateChangeSuccess', function(event) {
 			GATracker.trackPageView($location.path());
 		});
+
+        $window.onSignIn = function(googleUser) {
+            var profile = googleUser.getBasicProfile();
+
+            $rootScope.$broadcast('identity.confirm', {
+                identity: {
+                    email: profile.getEmail(),
+                    id: profile.getId(),
+                    image: profile.getImageUrl(),
+                    name: profile.getName()
+                }
+            });
+        }
 	});
 
 	angular.element(document).ready(function() {
