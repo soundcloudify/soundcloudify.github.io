@@ -48,12 +48,14 @@
 		return '_' + Math.random().toString(36).substr(2, 9);
     }
 
-	var soundCloudify = angular.module('soundCloudify', ['ngMaterial', 'ngRoute', 'ui.router', 'react']);
+	var soundCloudify = angular.module('soundCloudify', ['ngMaterial', 'ngRoute', 'ui.router', 'react', 'indexedDB']);
 
-	soundCloudify.value('CLIENT_ID', '849e84ac5f7843ce1cbc0e004ae4fb69');
+    soundCloudify.value('API_ENDPOINT', 'http://api.getsoundcloudify.com');
+    // soundCloudify.value('API_ENDPOINT', 'http://localhost:3000');
+    soundCloudify.value('CLIENT_ID', '849e84ac5f7843ce1cbc0e004ae4fb69');
 
-	soundCloudify.config(['$stateProvider', '$urlRouterProvider', '$mdThemingProvider', '$compileProvider',
-		function($stateProvider, $urlRouterProvider, $mdThemingProvider, $compileProvider) {
+	soundCloudify.config(['$stateProvider', '$urlRouterProvider', '$mdThemingProvider', '$compileProvider', '$httpProvider', '$indexedDBProvider',
+		function($stateProvider, $urlRouterProvider, $mdThemingProvider, $compileProvider, $httpProvider, $indexedDBProvider) {
 
 			$stateProvider
 				.state('nowPlaying', {
@@ -137,19 +139,41 @@
 
 			$compileProvider.imgSrcSanitizationWhitelist(/^\s*((https?|ftp|file|blob|chrome-extension):|data:image\/)/);
 
+            $httpProvider.interceptors.push('HttpRequestInterceptor');
+
+            $indexedDBProvider
+                .connection('soundcloudify')
+                .upgradeDatabase(1, function(event, db, tx){
+                    console.log('upgradeDatabase');
+                    var playlistStore = db.createObjectStore('playlist', {keyPath: 'uuid'});
+                    playlistStore.createIndex('sync', 'sync', {unique: false});
+                    playlistStore.createIndex('deleted', 'deleted', {unique: false});
+
+                    var nowplayingStore = db.createObjectStore('nowplaying', {keyPath: 'uuid'});
+                    nowplayingStore.createIndex("sync", "sync", { unique: false });
+                    nowplayingStore.createIndex("deleted", "deleted", { unique: false });
+
+                    var starStore = db.createObjectStore('starred', {keyPath: 'id'});
+                    starStore.createIndex("sync", "sync", { unique: false });
+                    starStore.createIndex("deleted", "deleted", { unique: false });
+                });
+
 			//TODO: reenable it in production
 			$compileProvider.debugInfoEnabled(false);
 		}
 	]);
 
-	soundCloudify.run(function($rootScope, GATracker, $location, $window) {
+	soundCloudify.run(function($rootScope, GATracker, $location, SyncService, $window) {
 		$rootScope.$on('$stateChangeSuccess', function(event) {
 			GATracker.trackPageView($location.path());
 		});
 
+        SyncService.init();
+
         $window.onSignIn = function(googleUser) {
             var profile = googleUser.getBasicProfile();
 
+            console.log('sign in success');
             $rootScope.$broadcast('identity.confirm', {
                 identity: {
                     email: profile.getEmail(),

@@ -29,6 +29,7 @@ module.exports = function(config) {
       'bower_components/underscore/underscore.js',
       'bower_components/react/react.js',
       'bower_components/ngReact/ngReact.js',
+      'bower_components/angular-indexed-db/angular-indexed-db.js',
       'bower_components/angular-mocks/angular-mocks.js',
       // endbower
       'app/scripts/**/*.js',

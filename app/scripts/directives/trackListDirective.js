@@ -9,7 +9,7 @@
         return reactDirective('TrackList')
     };
 
-    function trackListDirective($playlistMenu, CorePlayer, PlaylistService, $mdToast, GATracker) {
+    function trackListDirective($playlistMenu, CorePlayer, PlaylistService, NowPlaying, StarService, $mdToast, GATracker) {
         return {
             restrict: 'E',
             templateUrl: 'scripts/views/trackList.html',
@@ -17,7 +17,8 @@
                 tracks: '=',
                 trackClick: '&',
                 onTrackClick: '@',
-                listContext: '@'
+                listContext: '@',
+                listIndex: '@'
             },
             link: function($scope, element, attrs) {
 
@@ -93,17 +94,24 @@
 
                 $scope.handleRemoveTrack = function(track) {
                     var index = _.findIndex($scope.tracks, function(iterator) {
-                        return iterator.id === track.id;
+                        return iterator.uuid === track.uuid;
                     });
 
-                    //since $scope.tracks is always a decorated array, means we have no reference to it
-                    //we have to remove track in this to update the UI
-                    $scope.tracks.splice(index, 1);
+                    // //since $scope.tracks is always a decorated array, means we have no reference to it
+                    // //we have to remove track in this to update the UI
+                    // $scope.tracks.splice(index, 1);
 
                     if ($scope.listContext === 'nowplaying') {
+
+                        $scope.tracks.splice(index, 1);
                         CorePlayer.remove(index);
+
                     } else if ($scope.listContext === 'playlist') {
-                        //TODO:
+                        if(!$scope.listIndex) {
+                            throw new Error('list index undefined');
+                        }
+                        $scope.tracks.splice(index, 1);
+                        PlaylistService.removeTrackFromPlaylist(index, $scope.listIndex);
                     }
 
                     GATracker.trackDiscovery('remove track', $scope.listContext);
@@ -119,9 +127,9 @@
                     }
 
                     if (track.starred) {
-                        PlaylistService.starTrack(track);
+                        StarService.starTrack(track);
                     } else {
-                        PlaylistService.unstarTrack(track);
+                        StarService.unstarTrack(track);
                     }
                 };
             }

@@ -6,8 +6,14 @@
 
     var DEFAULT_LIMIT = 20;
 
+    function SearchService($http, CLIENT_ID, TrackAdapter, $q, YahooProxy){
 
-    function SearchService($http, CLIENT_ID, TrackAdapter, $q){
+        var customTransform = function(result) {
+            if (!result || !result.collection) return [];
+            return {
+                tracks: TrackAdapter.adaptMultiple(result.collection, 'sc')
+            };
+        };
         
         return {
             search: search,
@@ -15,24 +21,17 @@
         };
 
         function search(term, pagingObject){
-            var params = { q: term, limit: pagingObject.limit, offset: pagingObject.skip, linked_partitioning: 1, client_id: CLIENT_ID };
 
             return $q(function(resolve, reject) {
-                $http({
-                    url: 'https://api-v2.soundcloud.com/search/tracks',
-                    method: 'GET',
-                    params: params,
-                    transformResponse: ServiceHelpers.appendTransform($http.defaults.transformResponse, function(result) {
-                        if (!result || !result.collection) return [];
-                        return {
-                            tracks: TrackAdapter.adaptMultiple(result.collection, 'sc')
-                        };
-                    })
-                }).success(function(data) {
-                    resolve(data)
-                }).error(function() {
-                    reject();
-                });
+                
+                var params = { q: term, limit: pagingObject.limit, offset: pagingObject.skip, linked_partitioning: 1, client_id: CLIENT_ID };
+                var soundcloudUrl = window.ServiceHelpers.buildUrl('https://api-v2.soundcloud.com/search/tracks', params)
+
+                YahooProxy
+                        .request(soundcloudUrl, customTransform)
+                        .then(function(data) {
+                            resolve(data);
+                        });
             })
         }
 

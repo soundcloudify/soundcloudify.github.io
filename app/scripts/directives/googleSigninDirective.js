@@ -30,6 +30,10 @@
                         }
                     });
                 };
+
+                $scope.$on('identity.confirm', function() {
+                    iElm.attr('style', 'display: none');
+                });
             }
         };
     });

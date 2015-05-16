@@ -36,38 +36,22 @@
 
         var self = this;
 
-        this.tracks = [];
-        this.state = DEFAULT_STATE;
+        this.nowplaying = NowPlaying.getTrackIds();
+        this.state = NowPlaying.getState();
+
         this.startTimestamp = null;
         this.activePlayer = null;
-
-        NowPlaying.getList(function(tracks) {
-            self.tracks = tracks;
-        });
-
-        NowPlaying.getState(function(savedState) {
-            if (savedState && typeof savedState.volume !== 'undefined') {
-                self.state = savedState;
-            }
-        });
 
         this.add = function(track, andPlay) {
 
             andPlay = andPlay || true;
 
             if (track) {
-                //we need to do a copy here to ensure each track we add
-                //to the playlist will have a unique id
-                track = angular.copy(track);
-                track.uuid = window.ServiceHelpers.ID();
-                
-                this.tracks.unshift(track);
-
-                NowPlaying.saveList(this.tracks);
-            }
-
-            if (andPlay) {
-                this.play(0);
+                NowPlaying.addTrack(track).then(function() {
+                    if (andPlay) {
+                        self.play(0);
+                    }
+                });
             }
 
         };
@@ -76,15 +60,9 @@
          * Add track to position after the current index, in order to play this track  next
          */
         this.playNext = function(track) {
-            
-            if (track) {
-                track = angular.copy(track);
-                track.uuid = window.ServiceHelpers.ID();
-                
-                var currentIndex = this.state.currentIndex;
-                this.tracks.splice(currentIndex + 1, 0, track);
 
-                NowPlaying.saveList(this.tracks);
+            if (track) {
+                NowPlaying.addTrack(track, this.state.currentIndex + 1);
             }
 
         };
@@ -96,96 +74,92 @@
          */
         this.playAll = function(tracks) {
 
-            this.tracks = tracks;
-            NowPlaying.saveList(this.tracks);
-
-            angular.extend(this.state, {
-                currentTrack: false,
-                currentIndex: 0,
-                playing: false,
-                currentTime: 0,
-                duration: 0
-            });
-
-            this.play(0);
+            NowPlaying.addTracks(tracks)
+                .then(function() {
+                    angular.extend(self.state, {
+                        currentTrack: false,
+                        currentIndex: 0,
+                        playing: false,
+                        currentTime: 0,
+                        duration: 0
+                    });
+                    self.play(0);
+                });
         };
 
         /**
          * Remove track at specific index
          */
         this.remove = function(index) {
-            this.tracks.splice(index, 1);
+            NowPlaying.removeTrack(index).then(function() {
+                if (self.state.currentIndex === index) {
+                    self.play(index);
+                } else if (index < self.state.currentIndex){
+                    self.state.currentIndex --;
+                }
 
-            if (this.state.currentIndex === index) {
-                this.play(index);
-            } else if (index < this.state.currentIndex){
-                this.state.currentIndex --;
-            }
-
-            NowPlaying.saveList(this.tracks);
-            NowPlaying.saveState(this.state);
+                NowPlaying.saveState(self.state);
+            });
         };
 
         this.clear = function() {
-            this.tracks = [];
+            NowPlaying
+                .removeAllTracks()
+                .then(function() {
+                    angular.extend(self.state, {
+                        currentTrack: null,
+                        currentIndex: 0,
+                        playing: false,
+                        currentTime: 0,
+                        duration: 0
+                    });
 
-            angular.extend(this.state, {
-                currentTrack: null,
-                currentIndex: 0,
-                playing: false,
-                currentTime: 0,
-                duration: 0
-            });
-
-            NowPlaying.saveList(this.tracks);
-            NowPlaying.saveState(this.state);
-            
-            if(this.activePlayer) {
-                this.activePlayer.clear();
-            }
-        }
+                    Messaging.sendClearMessage();
+                    NowPlaying.saveState(self.state);
+                });
+        };
 
         this.play = function(index) {
 
             index = index || 0;
 
-            var track = this.tracks[index];
+            var uuid = this.nowplaying.trackIds[index];
 
-            if (!track) {
+            if (!uuid) {
                 throw 'No track found for playing, index=' + index;
             }
 
-            if (track) {
-                this.state.playing = true;
-                this.state.currentTime = 0;
-                this.state.duration = 0;
-                this.state.currentTrack = track;
-                this.state.currentIndex = index;
+            if (uuid) {
 
-                if (track.error) {
-                    track.error = false
-                    NowPlaying.saveList(this.tracks);
-                };
+                NowPlaying.getTrack(uuid)
+                    .then(function(track) {
+                        self.state.playing = true;
+                        self.state.currentTime = 0;
+                        self.state.duration = 0;
+                        self.state.currentTrack = track;
+                        self.state.currentIndex = index;
 
-                NowPlaying.saveState(this.state);
-                
-                if (track.origin === ORIGIN_YOUTUBE) {
-                    SoundCloudPlayer.clear();
-                    YouTubePlayer.play(track);
-                    this.activePlayer = YouTubePlayer;
-                } else {
-                    YouTubePlayer.clear();
-                    SoundCloudPlayer.play(track);
-                    this.activePlayer = SoundCloudPlayer;
-                }
+                        NowPlaying.saveState(self.state);
 
-                this.startTimestamp = Math.floor(Date.now() / 1000);
+                        if (track.origin === ORIGIN_YOUTUBE) {
+                            SoundCloudPlayer.clear();
+                            YouTubePlayer.play(track);
+                            self.activePlayer = YouTubePlayer;
+                        } else {
+                            YouTubePlayer.clear();
+                            SoundCloudPlayer.play(track);
+                            self.activePlayer = SoundCloudPlayer;
+                        }
+
+                        self.startTimestamp = Math.floor(Date.now() / 1000);
+
+                    });
             }
         };
 
         this.pause = function() {
             this.state.playing = false;
-            NowPlaying.saveState(this.state);
+            NowPlaying.saveState(self.state);
             
             if(this.activePlayer) {
                 this.activePlayer.pause();
@@ -196,7 +170,7 @@
             this.state.playing = true;
             NowPlaying.saveState(this.state);
             if (!this.activePlayer) {
-                this.play(this.state.currentTrack);
+                this.play(this.state.currentIndex);
                 return;
             }
 
@@ -215,7 +189,7 @@
 
         this.playPause = function(index) {
             if (typeof index !== 'undefined') {
-                if (index === this.state.currentIndex) {
+                if (index === this.state.currentIndex && this.activePlayer) {
                     this.state.playing ? this.pause() : this.resume();
                 } else {
                     this.play(index);
