@@ -13,6 +13,17 @@
 
         PlaylistStorage.prototype = {
             constructor: PlaylistStorage,
+            getById: function(uuid) {
+                return $q(function(resolve, reject) {
+                    $indexedDB.openStore('playlist', function(store) {
+                        store.find(uuid).then(function(playlist) {
+                            resolve(playlist);
+                        }, function() {
+                            reject();
+                        });
+                    });
+                });
+            },
             upsert: function (playlist) {
                 $indexedDB.openStore('playlist', function(store) {
                     store.upsert(playlist);
@@ -40,7 +51,7 @@
                         var query = store.query();
                         query.$index('deleted');
                         query.$eq(0);
-                        store.eachWhere(query).then(function(playlist) {  
+                        store.eachWhere(query).then(function(playlist) {
                             resolve(_.sortBy(playlist, 'order').reverse());
                         });
                     });
@@ -49,12 +60,7 @@
             getUnsyncedPlaylists: function() {
                 return $q(function(resolve, reject) {
                     $indexedDB.openStore('playlist', function(store) {
-
-                        var query = store.query();
-                        query.$index('sync');
-                        query.$eq(0);
-
-                        store.eachWhere(query).then(function(playlists) {
+                        store.getAll().then(function(playlists) {
                             resolve(playlists);
                         });
                     });
@@ -142,23 +148,6 @@
                         });
                         resolve();
                     });
-                });
-            },
-            markAllTracksAsDeleted: function() {
-                var self = this;
-                return $q(function(resolve, reject) {
-                    self.getTracks()
-                        .then(function(tracks) {
-                            _.each(tracks, function(track) {
-                                track.deleted = 1;
-                                track.sync = 0;
-                            });
-
-                            self.upsert(tracks).then(function() {
-                                console.log('mark delete');
-                                resolve();
-                            });
-                        })
                 });
             },
             getUnsyncedTracks: function() {

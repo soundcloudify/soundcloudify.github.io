@@ -50,9 +50,9 @@
             } else {
                 normalizedTrack.id = track.id;
                 normalizedTrack.title = track.title;
-                normalizedTrack.artworkUrl = track.artwork_url || track.user.avatar_url || DEFAULT_THUMBNAIL;
+                normalizedTrack.artworkUrl = getSoundCloudArtwork(track);
                 normalizedTrack.streamUrl = track.stream_url;
-                normalizedTrack.user = track.user.username;
+                normalizedTrack.user = track.user ? track.user.username : 'unknown';
                 normalizedTrack.likeCount = track.likes_count;
                 normalizedTrack.dislikeCount = null;
                 normalizedTrack.viewCount = track.playback_count;
@@ -65,6 +65,17 @@
             return normalizedTrack;
         }
 
+        function getSoundCloudArtwork(track) {
+
+            if (track.artwork_url && track.artwork_url !== 'null') {
+                return track.artwork_url;
+            } else if(track.user && track.user.avatar_url && track.user.avatar_url !== 'null') {
+                return track.user.avatar_url;
+            }
+
+            return DEFAULT_THUMBNAIL;
+
+        }
 
         function adaptMultiple(tracks, origin) {
             return _.filter(_.map(tracks, function(track) {

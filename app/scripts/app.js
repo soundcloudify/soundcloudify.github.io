@@ -163,10 +163,14 @@
 		}
 	]);
 
-	soundCloudify.run(function($rootScope, GATracker, $location, SyncService, $window) {
+	soundCloudify.run(function($rootScope, GATracker, $location, PlaylistService, StarService, SyncService, $window) {
 		$rootScope.$on('$stateChangeSuccess', function(event) {
 			GATracker.trackPageView($location.path());
 		});
+
+        PlaylistService.init();
+
+        StarService.init();
 
         SyncService.init();
 

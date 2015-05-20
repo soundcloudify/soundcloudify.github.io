@@ -28,7 +28,7 @@
         lastFmInvalid: false
     };
 
-    function NowPlayingService($http, $q, CLIENT_ID, $rootScope, API_ENDPOINT, SyncService, StorageService){
+    function NowPlayingService($http, $q, CLIENT_ID, $rootScope, API_ENDPOINT, StorageService){
 
         var nowplaying = {
             trackIds: JSON.parse(localStorage.getItem('nowplaying')) || []
@@ -122,13 +122,11 @@
                                 }
 
                                 _saveTrackIds(nowplaying.trackIds);
-                                SyncService.push().then(SyncService.bumpLastSynced);
                                 resolve();
                             } else {
                                 nowplaying.trackIds.unshift(track.uuid);
 
                                 _saveTrackIds(nowplaying.trackIds);
-                                SyncService.push().then(SyncService.bumpLastSynced);
                                 resolve();
                             }
                         });
@@ -138,7 +136,6 @@
                     Storage.insert(track);
 
                     _saveTrackIds(nowplaying.trackIds);
-                    SyncService.push().then(SyncService.bumpLastSynced);
                     resolve();
                 }
 
@@ -172,8 +169,6 @@
 
                     Storage.insert(tracksToAdd);
 
-                    SyncService.push().then(SyncService.bumpLastSynced);
-
                     resolve();
                 });
 
@@ -197,15 +192,12 @@
                         if (track) {
                             nowplaying.trackIds.splice(position, 1);
 
-                            //mark the track as deleted for the SyncService to know how to handle it
                             track.deleted = 1;
                             track.sync = 0;
                             Storage.upsert([track]);
                         }
 
                         _saveTrackIds(nowplaying.trackIds);
-
-                        SyncService.push().then(SyncService.bumpLastSynced);
 
                         resolve();
                     });
@@ -227,10 +219,6 @@
                         nowplaying.trackIds = [];
 
                         _saveTrackIds([]);
-
-                        if (triggerSync) {
-                            SyncService.push().then(SyncService.bumpLastSynced);
-                        }
 
                         resolve();
                     });
