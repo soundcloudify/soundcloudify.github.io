@@ -2,7 +2,7 @@
 
     'use strict';
 
-    var soundCloudify = angular.module('soundCloudify');
+    var soundCloudify = angular.module('soundcloudify.web');
 
     soundCloudify.service('CorePlayer', 
         function($rootScope, $window, $mdToast, Messaging, NowPlaying, CLIENT_ID, GATracker, LastFMAuthentication,

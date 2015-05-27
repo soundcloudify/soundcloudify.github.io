@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    angular.module('soundCloudify').directive('googleSignin', function($window){
+    angular.module('soundcloudify.web').directive('googleSignin', function($window){
         return {
             restrict: 'E',
             template: '<div class="goggle-signin"></div>',

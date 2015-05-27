@@ -1,7 +1,7 @@
 (function(){
     'use strict';
 
-    angular.module('soundCloudify')
+    angular.module('soundcloudify.web')
         .service("SoundCloudPlayer", SoundCloudPlayer);
 
     function SoundCloudPlayer($rootScope, CLIENT_ID){
