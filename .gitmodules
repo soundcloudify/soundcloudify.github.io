@@ -1,0 +1,3 @@
+[submodule "app/scripts/core"]
+	path = app/scripts/core
+	url = git@bitbucket.org:ptgamr/soundcloudify-client-core.git
