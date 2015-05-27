@@ -337,7 +337,7 @@ module.exports = function (grunt) {
         files: [{
           expand: true,
           cwd: '<%= yeoman.dist %>',
-          src: ['*.html', 'views/{,*/}*.html', 'scripts/views/{,*/}*.html'],
+          src: ['*.html', 'views/{,*/}*.html', 'scripts/views/{,*/}*.html', 'scripts/core/views/{,*/}*.html'],
           dest: '<%= yeoman.dist %>'
         }]
       }
@@ -378,6 +378,7 @@ module.exports = function (grunt) {
             '*.html',
             'views/{,*/}*.html',
             'scripts/views/*.html',
+            'scripts/core/views/*.html',
             'partials/**/*',
             'fonts/**/*',
             'images/{,*/}*.{webp}',
@@ -392,6 +393,12 @@ module.exports = function (grunt) {
           expand: true,
           dot: true,
           cwd: 'bower_components/ionicons/fonts',
+          dest: '<%= yeoman.dist %>/fonts',
+          src: ['*']
+        }, {
+          expand: true,
+          dot: true,
+          cwd: 'bower_components/font-awesome/fonts',
           dest: '<%= yeoman.dist %>/fonts',
           src: ['*']
         }]
