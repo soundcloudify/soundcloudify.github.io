@@ -1,19 +1,26 @@
 <md-content class="tab-content md-padding" playing-track-aware="index">
     <loading ng-if="vm.loading"></loading>
-    <div ng-if="!vm.tracks.length && !vm.loading">
-        No active track yet...
+    <div class="nowplaying-empty" ng-if="!vm.tracks.length && !vm.loading">
+        “Without music, life would be a mistake.”
     </div>
     <track-list  tracks="vm.tracks" on-track-click="playpause" list-context="nowplaying"></track-list>
 </md-content>
 <md-toolbar class="bottom-toolbar">
     <div class="md-toolbar-tools">
-        <span flex>
-            <md-button ng-click="vm.saveStream($event)" class="md-primary">Save As Playlist</md-button>
-        </span>
-        <span flex>
-            <md-button ng-click="vm.clearStream($event)">CLEAR ALL</md-button>
+        <span flex="66">
+            <md-button ng-click="vm.saveStream($event)" class="md-primary">
+                <i class="fa fa-music"></i>
+                &nbsp;Create playlist
+            </md-button>
+            <md-button ng-click="vm.clearStream($event)">
+                <i class="fa fa-remove"></i>
+                &nbsp;Clear
+            </md-button>
         </span>
         <span flex></span>
-        <configuration></configuration>
+        <span><md-progress-circular class="md-primary" md-mode="indeterminate" md-diameter="14" ng-show="syncing"></md-progress-circular></span
+        <span>
+            <configuration></configuration>
+        </span>
     </div>
 </md-toolbar>
