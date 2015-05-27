@@ -1,10 +1,20 @@
 <div ui-view></div>
 <md-toolbar class="bottom-toolbar">
     <div class="md-toolbar-tools">
+        <span flex>
+            <md-button ng-click="playlistCtrl.playAllListView()" class="md-primary" ng-show="'playlist.view' | isState">
+                <i class="fa fa-play"></i>
+                &nbsp;Play all
+            </md-button>
+            <md-button ng-click="playlistCtrl.openImportModal($event)" class="md-primary" ng-show="'playlist.list' | isState">
+                <i class="fa fa-plus"></i>
+                &nbsp;Import
+            </md-button>
+        </span>
         <span flex></span>
-        <span flex></span>
+        <span><md-progress-circular class="md-primary" md-mode="indeterminate" md-diameter="14" ng-show="syncing"></md-progress-circular></span
         <span>
-        	<configuration></configuration>
+            <configuration></configuration>
         </span>
     </div>
 </md-toolbar>
